@@ -10,7 +10,14 @@ router.get("/", (req, res, next) => {
 
   console.log(adminData.products);
   //sending html file
-  res.sendFile(path.join(__dirname, "../", "views", "shop.html"));
+  // res.sendFile(path.join(__dirname, "../", "views", "shop.html"));
+
+  //rendering pug file -> shop.pug
+  res.render("shop", {
+    prods: adminData.products, //passing data to pug file
+    docTitle: "Shop",
+    path: "/",
+  });
 });
 
 module.exports = router;
