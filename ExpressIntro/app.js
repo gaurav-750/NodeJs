@@ -2,26 +2,20 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const path = require("path");
 
-const expressHbs = require("express-handlebars");
-
 const adminData = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 
 const app = express();
 
-app.engine(
-  "handlebars",
-  expressHbs({
-    layoutsDir: "views/layouts/",
-    defaultLayout: "main-layout",
-    extname: "handlebars",
-  })
-);
+//* tell express to use ejs for templating
+app.set("view engine", "ejs");
+
 //* tell express to use handlebars for templating
-app.set("view engine", "handlebars");
+// app.set("view engine", "handlebars");
 
 //* tell express to use pug for templating
 // app.set("view engine", "pug");
+
 app.set("views", "views"); //tell express where to find the views
 
 app.use(bodyParser.urlencoded({ extended: false }));
