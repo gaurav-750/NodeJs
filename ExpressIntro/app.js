@@ -9,13 +9,6 @@ const app = express();
 
 //* tell express to use ejs for templating
 app.set("view engine", "ejs");
-
-//* tell express to use handlebars for templating
-// app.set("view engine", "handlebars");
-
-//* tell express to use pug for templating
-// app.set("view engine", "pug");
-
 app.set("views", "views"); //tell express where to find the views
 
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -33,6 +26,7 @@ app.use("/", (req, res, next) => {
 
   res.status(404).render("404", {
     pageTitle: "404",
+    path: "/404",
   });
 });
 

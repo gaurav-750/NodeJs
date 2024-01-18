@@ -14,13 +14,9 @@ router.get("/", (req, res, next) => {
 
   //rendering pug file -> shop.pug
   res.render("shop", {
-    prods: adminData.products, //passing data to pug file
+    prods: adminData.products, //passing data to ejs file
     pageTitle: "Shop",
     path: "/",
-    hasProducts: adminData.products.length > 0,
-    activeShop: true,
-    productCss: true,
-    // layout: false,
   });
 });
 
