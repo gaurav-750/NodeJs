@@ -17,6 +17,10 @@ router.get("/", (req, res, next) => {
     prods: adminData.products, //passing data to pug file
     docTitle: "Shop",
     path: "/",
+    hasProducts: adminData.products.length > 0,
+    activeShop: true,
+    productCss: true,
+    // layout: false,
   });
 });
 
