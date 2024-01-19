@@ -9,9 +9,10 @@ exports.getAddProducts = (req, res, next) => {
 };
 
 exports.postAddProduct = (req, res, next) => {
-  console.log(req.body);
-  //   products.push({ title: req.body.title });
-  const newProduct = new Product(req.body.title);
+  console.log("[Controllers/Admin]: postAddProduct", req.body);
+  const { title, imageUrl, price, description } = req.body;
+
+  const newProduct = new Product(title, imageUrl, description, price);
   newProduct.save();
 
   res.redirect("/");
@@ -19,7 +20,7 @@ exports.postAddProduct = (req, res, next) => {
 
 exports.getAllProducts = (req, res, next) => {
   Product.fetchAllProducts((products) => {
-    console.log("products in getAllproducts=>", products.length);
+    console.log("[Controllers/Admin]: getAllProducts", products.length);
 
     //rendering ejs file -> shop.pug
     res.render("admin/products", {
