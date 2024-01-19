@@ -1,9 +1,8 @@
 const Product = require("../models/product");
-// const products = [];
 
 //* controller for get add product
 exports.getAddProducts = (req, res, next) => {
-  res.render("add-product", {
+  res.render("admin/add-product", {
     pageTitle: "Add Product",
     path: "/admin/add-product",
   });
@@ -18,13 +17,15 @@ exports.postAddProduct = (req, res, next) => {
   res.redirect("/");
 };
 
-exports.getProducts = (req, res, next) => {
-  const products = Product.fetchAllProducts();
+exports.getAllProducts = (req, res, next) => {
+  Product.fetchAllProducts((products) => {
+    console.log("products in getAllproducts=>", products.length);
 
-  //rendering ejs file -> shop.pug
-  res.render("shop", {
-    prods: products, //passing data to ejs file
-    pageTitle: "Shop",
-    path: "/",
+    //rendering ejs file -> shop.pug
+    res.render("admin/products", {
+      prods: products, //passing data to ejs file
+      pageTitle: "Admin Products",
+      path: "/admin/products",
+    });
   });
 };
