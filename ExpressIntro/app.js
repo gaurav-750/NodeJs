@@ -7,7 +7,17 @@ const shopRoutes = require("./routes/shop");
 
 const errorController = require("./controllers/error");
 
+const db = require("./utils/database");
+
 const app = express();
+
+db.execute("select * from products")
+  .then((result) => {
+    console.log("result", result[0]);
+  })
+  .catch((err) => {
+    console.log("err", err);
+  });
 
 //* tell express to use ejs for templating
 app.set("view engine", "ejs");
