@@ -12,6 +12,8 @@ module.exports = class Product {
   }
 
   save() {
+    this.id = Math.random().toString(); //assigning an id to the product
+
     const p = path.join(__dirname, "../", "data", "products.json");
 
     fs.readFile(p, (err, fileContent) => {
@@ -43,6 +45,21 @@ module.exports = class Product {
       console.log("products in fetch =>", products);
 
       cb(products);
+    });
+  }
+
+  static findProductById(id, cb) {
+    const p = path.join(__dirname, "../", "data", "products.json");
+
+    fs.readFile(p, (err, fileContent) => {
+      if (err) {
+        //no file exists
+        return cb([]);
+      }
+
+      const products = JSON.parse(fileContent);
+      const product = products.find((p) => p.id === id);
+      cb(product);
     });
   }
 };
