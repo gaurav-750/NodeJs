@@ -4,7 +4,8 @@ const path = require("path");
 const fs = require("fs");
 
 module.exports = class Product {
-  constructor(title, imageUrl, description, price) {
+  constructor(id, title, imageUrl, description, price) {
+    this.id = id;
     this.title = title;
     this.imageUrl = imageUrl;
     this.description = description;
@@ -12,8 +13,6 @@ module.exports = class Product {
   }
 
   save() {
-    this.id = Math.random().toString(); //assigning an id to the product
-
     const p = path.join(__dirname, "../", "data", "products.json");
 
     fs.readFile(p, (err, fileContent) => {
@@ -22,12 +21,22 @@ module.exports = class Product {
         products = JSON.parse(fileContent);
       }
 
-      products.push(this);
-      console.log("products =>", products);
-
-      fs.writeFile(p, JSON.stringify(products), (err) => {
-        console.log("err", err);
-      });
+      if (this.id) {
+        const existingProductIndex = products.findIndex(
+          (p) => p.id === this.id
+        );
+        const updatedProducts = [...products];
+        updatedProducts[existingProductIndex] = this;
+        fs.writeFile(p, JSON.stringify(updatedProducts), (err) => {
+          console.log(err);
+        });
+      } else {
+        this.id = Math.random().toString(); //assigning an id to the product
+        products.push(this);
+        fs.writeFile(p, JSON.stringify(products), (err) => {
+          console.log("err", err);
+        });
+      }
     });
   }
 
