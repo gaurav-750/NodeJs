@@ -11,6 +11,8 @@ router.get("/products/:productId", shopController.getProductDetail); //* dynamic
 
 router.get("/cart", shopController.getCart);
 
+router.post("/cart", shopController.addToCart);
+
 router.get("/checkout", shopController.getCheckout);
 
 module.exports = router;
