@@ -2,7 +2,11 @@ const { where } = require("sequelize");
 const Product = require("../models/product");
 
 exports.getAllProducts = (req, res, next) => {
-  Product.findAll()
+  Product.findAll({
+    where: {
+      userId: req.user.id,
+    },
+  })
     .then((products) => {
       res.render("admin/products", {
         prods: products, //passing data to ejs file
@@ -32,6 +36,7 @@ exports.postAddProduct = (req, res, next) => {
     price,
     imageUrl,
     description,
+    userId: req.user.id,
   })
     .then((result) => {
       // console.log("result in postAddProduct:", result);
