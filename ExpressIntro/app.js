@@ -7,7 +7,7 @@ const shopRoutes = require("./routes/shop");
 
 const errorController = require("./controllers/error");
 
-const db = require("./utils/database");
+const sequelize = require("./utils/database");
 
 const app = express();
 
@@ -25,6 +25,15 @@ app.use(shopRoutes);
 //404 page
 app.use("/", errorController.get404);
 
-app.listen(3000, () => {
-  console.log("Server is running on port 3000");
-});
+sequelize
+  .sync()
+  .then((result) => {
+    // console.log("result in sync:", result);
+    console.log("Connected to Database successfully!");
+    app.listen(3000, () => {
+      console.log("Server is running on port 3000");
+    });
+  })
+  .catch((err) => {
+    console.log("err in sync:", err);
+  });

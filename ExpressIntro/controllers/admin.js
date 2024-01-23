@@ -9,17 +9,21 @@ exports.getAddProducts = (req, res, next) => {
 };
 
 exports.postAddProduct = (req, res, next) => {
-  console.log("[Controllers/Admin]: postAddProduct", req.body);
+  console.log("[Controllers/Admin/postAddProduct]: ", req.body);
   const { title, imageUrl, price, description } = req.body;
 
-  const newProduct = new Product(null, title, imageUrl, description, price);
-  newProduct
-    .save()
-    .then(() => {
-      res.redirect("/");
+  Product.create({
+    title,
+    price,
+    imageUrl,
+    description,
+  })
+    .then((result) => {
+      // console.log("result in postAddProduct:", result);
+      console.log("[Controllers/Admin/postAddProduct]: Created Product ");
     })
     .catch((err) => {
-      console.log("err", err);
+      console.log("err in postAddProduct:", err);
     });
 };
 
