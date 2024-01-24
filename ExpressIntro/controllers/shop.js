@@ -1,13 +1,12 @@
 const Product = require("../models/product");
 const Cart = require("../models/cart");
+const CartItem = require("../models/cart-item");
 
 exports.getIndex = (req, res, next) => {
   //* using sequelize
 
   Product.findAll()
     .then((products) => {
-      console.log("[Controllers/Shop/getIndex] products:", products);
-
       res.render("shop/index", {
         prods: products,
         pageTitle: "Shop",
@@ -54,36 +53,86 @@ exports.getProductDetail = (req, res, next) => {
     });
 };
 
+//! CART
 exports.getCart = (req, res, next) => {
-  Cart.getProductsOfCart((cart) => {
-    Product.fetchAllProducts((products) => {
-      const cartProducts = [];
-      for (prod of products) {
-        const cartProductData = cart.products.find((p) => p.id === prod.id);
-        if (cartProductData) {
-          cartProducts.push({ productData: prod, qty: cartProductData.qty });
-        }
-      }
+  Cart.findAll({
+    where: {
+      userId: req.user.id,
+    },
+  })
+    .then((cart) => {
+      // console.log("[Controllers/Shop/getCart] cart:", cart);
+      return cart[0].getProducts();
+    })
+    .then((products) => {
+      //get the products of the cart
+      // console.log("[Controllers/Shop/getCart] products:", products);
 
-      console.log("cartProducts =>", cartProducts);
       res.render("shop/cart", {
         path: "/cart",
         pageTitle: "Your Cart",
-        products: cartProducts,
+        products: products,
       });
+    })
+    .catch((err) => {
+      console.log("[Controllers/Shop/getCart] err:", err);
     });
-  });
 };
 
+//add products to Cart
 exports.addToCart = (req, res, next) => {
+  console.log("[Controllers/Shop/addToCart] req.body:", req.body);
   const { productId } = req.body;
-  console.log("[Controllers/Shop]: addToCart", productId);
 
-  Product.findProductById(productId, (product) => {
-    Cart.addProduct(productId, product.price);
-  });
+  let fetchedCart;
+  //first find whether the user has a cart
+  Cart.findOne({
+    where: {
+      userId: req.user.id,
+    },
+  })
+    .then((cart) => {
+      console.log("[Controllers/Shop/addToCart] cart:", cart);
+      if (!cart) {
+        //cart not found
+        return Cart.create({
+          //create a new cart
+          userId: req.user.id,
+        });
+      }
+      return cart;
+    })
+    .then((cart) => {
+      fetchedCart = cart;
 
-  res.redirect("/cart");
+      //check if the product is already in the cart
+      return CartItem.findOne({
+        where: {
+          cartId: cart.id,
+          productId: productId,
+        },
+      });
+    })
+    .then((cartItem) => {
+      if (cartItem) {
+        cartItem.quantity += 1; //means product is already there in the cart
+        return cartItem.save();
+      }
+
+      //product is not added to the cart yet
+      return CartItem.create({
+        cartId: fetchedCart.id,
+        productId: productId,
+        quantity: 1,
+      });
+    })
+    .then((cartItem) => {
+      console.log("[Controllers/Shop/addToCart] cartItem:", cartItem);
+      res.redirect("/cart");
+    })
+    .catch((err) => {
+      console.log("[Controllers/Shop/addToCart] err:", err);
+    });
 };
 
 exports.getCheckout = (req, res, next) => {
@@ -94,10 +143,27 @@ exports.getCheckout = (req, res, next) => {
 };
 
 exports.postCartDeleteProduct = (req, res, next) => {
-  const productId = req.body.productId;
-  Product.findProductById(productId, (product) => {
-    Cart.deleteProduct(productId, product.price);
+  console.log("[Controllers/Shop/postCartDeleteProduct] req.body:", req.body);
+  const { productId } = req.body;
 
-    res.redirect("/cart");
-  });
+  Cart.findOne({
+    where: {
+      userId: req.user.id,
+    },
+  })
+    .then((cart) => {
+      CartItem.destroy({
+        where: {
+          cartId: cart.id,
+          productId: productId,
+        },
+      });
+    })
+    .then(() => {
+      console.log("[Controllers/Shop/addToCart] CartItem Deleted");
+      res.redirect("/cart");
+    })
+    .catch((err) => {
+      console.log("[Controllers/Shop/postCartDeleteProduct] err:", err);
+    });
 };
