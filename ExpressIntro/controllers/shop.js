@@ -1,6 +1,7 @@
 const Product = require("../models/product");
 const Cart = require("../models/cart");
 const CartItem = require("../models/cart-item");
+const OrderItem = require("../models/order-item");
 
 exports.getIndex = (req, res, next) => {
   //* using sequelize
@@ -135,13 +136,6 @@ exports.addToCart = (req, res, next) => {
     });
 };
 
-exports.getCheckout = (req, res, next) => {
-  res.render("shop/checkout", {
-    path: "/checkout",
-    pageTitle: "Checkout",
-  });
-};
-
 exports.postCartDeleteProduct = (req, res, next) => {
   console.log("[Controllers/Shop/postCartDeleteProduct] req.body:", req.body);
   const { productId } = req.body;
@@ -165,5 +159,72 @@ exports.postCartDeleteProduct = (req, res, next) => {
     })
     .catch((err) => {
       console.log("[Controllers/Shop/postCartDeleteProduct] err:", err);
+    });
+};
+
+exports.getOrders = (req, res, next) => {
+  //get all the orders of the user
+  req.user
+    .getOrders({ include: ["products"] })
+    .then((orders) => {
+      console.log("[Controllers/Shop/getOrders] orders:", orders);
+
+      res.render("shop/orders", {
+        path: "/orders",
+        pageTitle: "Your Orders",
+        orders: orders,
+      });
+    })
+    .catch((err) => {
+      console.log("[Controllers/Shop/getOrders] err:", err);
+    });
+};
+
+exports.createOrder = (req, res, next) => {
+  //take all the cart items and move them to the order table
+
+  let fetchedCart;
+  Cart.findOne({
+    where: {
+      userId: req.user.id,
+    },
+  })
+    .then((cart) => {
+      fetchedCart = cart;
+
+      //get the Cartitems
+      return CartItem.findAll({
+        where: {
+          cartId: cart.id,
+        },
+      });
+    })
+    .then((items) => {
+      //create an order
+      //using magic method
+      return req.user
+        .createOrder()
+        .then((order) => {
+          //prepare data for bulk creation
+          const orderItemsData = items.map((cartItem) => {
+            return {
+              productId: cartItem.productId,
+              quantity: cartItem.quantity,
+              orderId: order.id,
+            };
+          });
+
+          return OrderItem.bulkCreate(orderItemsData);
+        })
+        .then((result) => {
+          //-> delete all the cart items
+          return fetchedCart.setProducts(null);
+        })
+        .then((result) => {
+          res.redirect("/orders");
+        });
+    })
+    .catch((err) => {
+      console.log("[Controllers/Shop/createOrder] err:", err);
     });
 };
