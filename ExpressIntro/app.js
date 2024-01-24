@@ -2,18 +2,15 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const path = require("path");
 
-const adminRoutes = require("./routes/admin");
-const shopRoutes = require("./routes/shop");
+// const adminRoutes = require("./routes/admin");
+// const shopRoutes = require("./routes/shop");
 
 const errorController = require("./controllers/error");
 
-const sequelize = require("./utils/database");
-const Product = require("./models/product");
-const User = require("./models/user");
-const Cart = require("./models/cart");
-const CartItem = require("./models/cart-item");
-const Order = require("./models/order");
-const OrderItem = require("./models/order-item");
+//* Connect to MongoDB
+const client = require("./utils/database");
+
+// const User = require("./models/user");
 
 const app = express();
 
@@ -27,53 +24,22 @@ app.use(express.static(path.join(__dirname, "public")));
 
 //* middleware to add user to request
 app.use((req, res, next) => {
-  User.findByPk(1)
-    .then((user) => {
-      req.user = user;
-      next();
-    })
-    .catch((err) => {
-      console.log("err in User middleware:", err);
-    });
+  // User.findByPk(1)
+  //   .then((user) => {
+  //     req.user = user;
+  //     next();
+  //   })
+  //   .catch((err) => {
+  //     console.log("err in User middleware:", err);
+  //   });
 });
 
-app.use("/admin", adminRoutes);
-app.use(shopRoutes);
+// app.use("/admin", adminRoutes);
+// app.use(shopRoutes);
 
 //404 page
 app.use("/", errorController.get404);
 
-//? define relations
-//one to many
-User.hasMany(Product);
-Product.belongsTo(User, { constraints: true, onDelete: "CASCADE" });
-
-//one to one association
-User.hasOne(Cart);
-Cart.belongsTo(User); //*userId will be added to Cart table
-
-//many to many association
-Cart.belongsToMany(Product, { through: CartItem });
-Product.belongsToMany(Cart, { through: CartItem });
-//CartItem -> cartId, productId
-
-//associations for 'Order' model
-User.hasMany(Order);
-Order.belongsTo(User); //*userId will be added to Order table
-
-Order.belongsToMany(Product, { through: OrderItem });
-Product.belongsToMany(Order, { through: OrderItem });
-
-sequelize
-  // .sync({ force: true })
-  .sync()
-  .then((result) => {
-    // console.log("result in sync:", result);
-    console.log("Connected to Database successfully!");
-    app.listen(3000, () => {
-      console.log("Server is running on port 3000");
-    });
-  })
-  .catch((err) => {
-    console.log("err in sync:", err);
-  });
+app.listen(3000, () => {
+  console.log("Server is running on port 3000");
+});
