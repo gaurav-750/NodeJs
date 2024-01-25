@@ -2,13 +2,13 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const path = require("path");
 
-// const adminRoutes = require("./routes/admin");
+const adminRoutes = require("./routes/admin");
 // const shopRoutes = require("./routes/shop");
 
 const errorController = require("./controllers/error");
 
 //* Connect to MongoDB
-const client = require("./utils/database");
+const { mongoConnect } = require("./utils/database");
 
 // const User = require("./models/user");
 
@@ -32,14 +32,20 @@ app.use((req, res, next) => {
   //   .catch((err) => {
   //     console.log("err in User middleware:", err);
   //   });
+  next();
 });
 
-// app.use("/admin", adminRoutes);
+app.use("/admin", adminRoutes);
 // app.use(shopRoutes);
 
 //404 page
 app.use("/", errorController.get404);
 
-app.listen(3000, () => {
-  console.log("Server is running on port 3000");
+mongoConnect(() => {
+  console.log(".....🛑🛑");
+  // console.log("client:", client);
+  app.listen(3000);
+  // app.listen(3000, () => {
+  // console.log("Server is running on port 3000");
+  // });
 });
