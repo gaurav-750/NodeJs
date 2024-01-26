@@ -9,6 +9,7 @@ const errorController = require("./controllers/error");
 
 //* Connect to MongoDB
 const { mongoConnect } = require("./utils/database");
+const User = require("./models/user");
 
 // const User = require("./models/user");
 
@@ -24,15 +25,14 @@ app.use(express.static(path.join(__dirname, "public")));
 
 //* middleware to add user to request
 app.use((req, res, next) => {
-  // User.findByPk(1)
-  //   .then((user) => {
-  //     req.user = user;
-  //     next();
-  //   })
-  //   .catch((err) => {
-  //     console.log("err in User middleware:", err);
-  //   });
-  next();
+  User.findById("65b3650cd3e84ab18647a1ab")
+    .then((user) => {
+      req.user = user;
+      next();
+    })
+    .catch((err) => {
+      console.log("err in User middleware:", err);
+    });
 });
 
 app.use("/admin", adminRoutes);
