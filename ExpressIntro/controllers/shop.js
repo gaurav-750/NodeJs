@@ -56,28 +56,15 @@ exports.getProductDetail = (req, res, next) => {
 
 //! CART
 exports.getCart = (req, res, next) => {
-  Cart.findAll({
-    where: {
-      userId: req.user.id,
-    },
-  })
-    .then((cart) => {
-      // console.log("[Controllers/Shop/getCart] cart:", cart);
-      return cart[0].getProducts();
-    })
-    .then((products) => {
-      //get the products of the cart
-      // console.log("[Controllers/Shop/getCart] products:", products);
-
-      res.render("shop/cart", {
-        path: "/cart",
-        pageTitle: "Your Cart",
-        products: products,
-      });
-    })
-    .catch((err) => {
-      console.log("[Controllers/Shop/getCart] err:", err);
+  //
+  req.user.getCart().then((products) => {
+    console.log("[Controllers/Shop/getCart] products:", products);
+    res.render("shop/cart", {
+      path: "/cart",
+      pageTitle: "Your Cart",
+      products: products,
     });
+  });
 };
 
 //add products to Cart
@@ -85,55 +72,63 @@ exports.addToCart = (req, res, next) => {
   console.log("[Controllers/Shop/addToCart] req.body:", req.body);
   const { productId } = req.body;
 
-  let fetchedCart;
-  //first find whether the user has a cart
-  Cart.findOne({
-    where: {
-      userId: req.user.id,
-    },
-  })
-    .then((cart) => {
-      console.log("[Controllers/Shop/addToCart] cart:", cart);
-      if (!cart) {
-        //cart not found
-        return Cart.create({
-          //create a new cart
-          userId: req.user.id,
-        });
-      }
-      return cart;
+  Product.fetchProductDetail(productId)
+    .then((product) => {
+      return req.user.addToCart(product);
     })
-    .then((cart) => {
-      fetchedCart = cart;
-
-      //check if the product is already in the cart
-      return CartItem.findOne({
-        where: {
-          cartId: cart.id,
-          productId: productId,
-        },
-      });
-    })
-    .then((cartItem) => {
-      if (cartItem) {
-        cartItem.quantity += 1; //means product is already there in the cart
-        return cartItem.save();
-      }
-
-      //product is not added to the cart yet
-      return CartItem.create({
-        cartId: fetchedCart.id,
-        productId: productId,
-        quantity: 1,
-      });
-    })
-    .then((cartItem) => {
-      console.log("[Controllers/Shop/addToCart] cartItem:", cartItem);
-      res.redirect("/cart");
-    })
-    .catch((err) => {
-      console.log("[Controllers/Shop/addToCart] err:", err);
+    .then((result) => {
+      console.log("[Controllers/Shop/addToCart] result:", result);
     });
+
+  // let fetchedCart;
+  // //first find whether the user has a cart
+  // Cart.findOne({
+  //   where: {
+  //     userId: req.user.id,
+  //   },
+  // })
+  //   .then((cart) => {
+  //     console.log("[Controllers/Shop/addToCart] cart:", cart);
+  //     if (!cart) {
+  //       //cart not found
+  //       return Cart.create({
+  //         //create a new cart
+  //         userId: req.user.id,
+  //       });
+  //     }
+  //     return cart;
+  //   })
+  //   .then((cart) => {
+  //     fetchedCart = cart;
+
+  //     //check if the product is already in the cart
+  //     return CartItem.findOne({
+  //       where: {
+  //         cartId: cart.id,
+  //         productId: productId,
+  //       },
+  //     });
+  //   })
+  //   .then((cartItem) => {
+  //     if (cartItem) {
+  //       cartItem.quantity += 1; //means product is already there in the cart
+  //       return cartItem.save();
+  //     }
+
+  //     //product is not added to the cart yet
+  //     return CartItem.create({
+  //       cartId: fetchedCart.id,
+  //       productId: productId,
+  //       quantity: 1,
+  //     });
+  //   })
+  //   .then((cartItem) => {
+  //     console.log("[Controllers/Shop/addToCart] cartItem:", cartItem);
+  //     res.redirect("/cart");
+  //   })
+  //   .catch((err) => {
+  //     console.log("[Controllers/Shop/addToCart] err:", err);
+  //   });
 };
 
 exports.postCartDeleteProduct = (req, res, next) => {
