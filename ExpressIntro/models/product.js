@@ -2,21 +2,36 @@ const getDb = require("../utils/database").getDb;
 const { ObjectId } = require("mongodb");
 
 class Product {
-  constructor(title, price, description, imageUrl) {
+  constructor(title, price, description, imageUrl, id) {
     this.title = title;
     this.price = price;
     this.description = description;
     this.imageUrl = imageUrl;
+    this._id = id;
   }
 
   save() {
-    const db = getDb();
+    let db = getDb();
+    // console.log("type:", typeof this._id);
+
+    if (this._id) {
+      //update the product
+      db = db.collection("products").updateOne(
+        {
+          _id: this._id,
+        },
+        {
+          $set: this,
+        }
+      );
+    } else {
+      //create a new product
+      db = db.collection("products").insertOne(this);
+    }
 
     return db
-      .collection("products")
-      .insertOne(this)
       .then((result) => {
-        console.log("result", result, result.insertedId);
+        console.log("result", result);
       })
       .catch((err) => {
         console.log("err in save", err);
@@ -47,11 +62,25 @@ class Product {
       .find({ _id: new ObjectId(prodId) })
       .next()
       .then((product) => {
-        console.log("product", product);
         return product;
       })
       .catch((err) => {
         console.log("err in fetchProductDetail", err);
+      });
+  }
+
+  static deleteProduct(prodId) {
+    const db = getDb();
+
+    return db
+      .collection("products")
+      .deleteOne({ _id: new ObjectId(prodId) })
+      .then((result) => {
+        console.log("result", result);
+        console.log("Product Deleted");
+      })
+      .catch((err) => {
+        console.log("err in deleteProduct", err);
       });
   }
 }
