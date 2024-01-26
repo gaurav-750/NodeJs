@@ -28,14 +28,13 @@ exports.getAddProducts = (req, res, next) => {
 };
 
 exports.postAddProduct = (req, res, next) => {
-  console.log("[Controllers/Admin/postAddProduct]: ", req.body);
+  console.log("[Controllers/Admin/postAddProduct]: req.body", req.body);
   const { title, imageUrl, price, description } = req.body;
 
   const product = new Product(title, price, description, imageUrl);
   product
     .save()
     .then((result) => {
-      // console.log("result in postAddProduct:", result);
       console.log("[Controllers/Admin/postAddProduct]: Created Product ");
       res.redirect("/admin/products");
     })
