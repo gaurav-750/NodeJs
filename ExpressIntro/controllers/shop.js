@@ -102,8 +102,9 @@ exports.postCartDeleteProduct = (req, res, next) => {
 
 exports.getOrders = (req, res, next) => {
   //get all the orders of the user
+
   req.user
-    .getOrders({ include: ["products"] })
+    .getOrder()
     .then((orders) => {
       console.log("[Controllers/Shop/getOrders] orders:", orders);
 
@@ -119,48 +120,12 @@ exports.getOrders = (req, res, next) => {
 };
 
 exports.createOrder = (req, res, next) => {
-  //take all the cart items and move them to the order table
-
-  let fetchedCart;
-  Cart.findOne({
-    where: {
-      userId: req.user.id,
-    },
-  })
-    .then((cart) => {
-      fetchedCart = cart;
-
-      //get the Cartitems
-      return CartItem.findAll({
-        where: {
-          cartId: cart.id,
-        },
-      });
-    })
-    .then((items) => {
-      //create an order
-      //using magic method
-      return req.user
-        .createOrder()
-        .then((order) => {
-          //prepare data for bulk creation
-          const orderItemsData = items.map((cartItem) => {
-            return {
-              productId: cartItem.productId,
-              quantity: cartItem.quantity,
-              orderId: order.id,
-            };
-          });
-
-          return OrderItem.bulkCreate(orderItemsData);
-        })
-        .then((result) => {
-          //-> delete all the cart items
-          return fetchedCart.setProducts(null);
-        })
-        .then((result) => {
-          res.redirect("/orders");
-        });
+  //
+  req.user
+    .addOrder()
+    .then((result) => {
+      console.log("[Controllers/Shop/createOrder] result:", result);
+      res.redirect("/orders");
     })
     .catch((err) => {
       console.log("[Controllers/Shop/createOrder] err:", err);
