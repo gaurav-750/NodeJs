@@ -1,6 +1,4 @@
-const { where } = require("sequelize");
 const Product = require("../models/product");
-const { ObjectId } = require("mongodb");
 
 exports.getAllProducts = (req, res, next) => {
   Product.fetchAllProducts()
@@ -28,16 +26,12 @@ exports.postAddProduct = (req, res, next) => {
   console.log("[Controllers/Admin/postAddProduct]: req.body", req.body);
   const { title, imageUrl, price, description } = req.body;
 
-  const product = new Product(
-    title,
-    price,
-    description,
-    imageUrl,
-    null,
-    req.user._id
-  );
-  product
-    .save()
+  Product.create({
+    title: title,
+    price: price,
+    description: description,
+    imageUrl: imageUrl,
+  })
     .then((result) => {
       console.log("[Controllers/Admin/postAddProduct]: Created Product ");
       res.redirect("/admin/products");
