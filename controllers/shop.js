@@ -1,12 +1,9 @@
 const Product = require("../models/product");
-// const Cart = require("../models/cart");
-// const CartItem = require("../models/cart-item");
-// const OrderItem = require("../models/order-item");
 
 exports.getIndex = (req, res, next) => {
-  //* using mongodb
+  //* using mongoose
 
-  Product.fetchAllProducts()
+  Product.find()
     .then((products) => {
       res.render("shop/index", {
         prods: products,
@@ -20,9 +17,9 @@ exports.getIndex = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  //* using mongodb
+  //* using mongoose
 
-  Product.fetchAllProducts()
+  Product.find()
     .then((products) => {
       res.render("shop/product-list", {
         prods: products,
@@ -39,7 +36,7 @@ exports.getProductDetail = (req, res, next) => {
   console.log("[Controllers/Shop/getProductDetail] req.params:", req.params);
   const prodId = req.params.productId;
 
-  Product.fetchProductDetail(prodId)
+  Product.findById(prodId)
     .then((product) => {
       console.log("[Controllers/Shop/getProductDetail] product:", product);
 
