@@ -8,10 +8,8 @@ const shopRoutes = require("./routes/shop");
 const errorController = require("./controllers/error");
 
 //* Connect to MongoDB
-const { mongoConnect } = require("./utils/database");
+const db = require("./utils/database");
 const User = require("./models/user");
-
-// const User = require("./models/user");
 
 const app = express();
 
@@ -41,8 +39,6 @@ app.use(shopRoutes);
 //404 page
 app.use("/", errorController.get404);
 
-mongoConnect(() => {
-  app.listen(3000, () => {
-    console.log("Server is running on port 3000");
-  });
+app.listen(3000, () => {
+  console.log("Server is running on port 3000");
 });

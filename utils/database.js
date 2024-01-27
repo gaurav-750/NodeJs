@@ -1,29 +1,16 @@
-const { MongoClient } = require("mongodb");
 const uri =
   "mongodb+srv://somanigaurav:6owytrHAY2W2K1Zr@nodeshop.d9s3efh.mongodb.net/shop?retryWrites=true&w=majority";
 
-let _db;
+const mongoose = require("mongoose");
 
-const mongoConnect = (callback) => {
-  MongoClient.connect(uri)
-    .then((client) => {
-      console.log("Connected to MongoDB!");
+//* Connect to MongoDB using mongoose
+mongoose.connect(uri);
 
-      _db = client.db(); //this will give access to 'nodeshop' database
+const db = mongoose.connection;
 
-      callback();
-    })
-    .catch((err) => {
-      console.log("Error connecting to MongoDB:", err);
-      throw err;
-    });
-};
+db.on("error", console.error.bind(console, "Connection error:"));
+db.once("open", function () {
+  console.log("Connected to MongoDB!");
+});
 
-const getDb = () => {
-  if (_db) {
-    return _db;
-  }
-  throw "No database found!";
-};
-
-module.exports = { mongoConnect, getDb };
+module.exports = db;
