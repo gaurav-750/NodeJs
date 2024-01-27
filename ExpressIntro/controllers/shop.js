@@ -78,78 +78,21 @@ exports.addToCart = (req, res, next) => {
     })
     .then((result) => {
       console.log("[Controllers/Shop/addToCart] result:", result);
+      res.redirect("/cart");
+    })
+    .catch((err) => {
+      console.log("[Controllers/Shop/addToCart] err:", err);
     });
-
-  // let fetchedCart;
-  // //first find whether the user has a cart
-  // Cart.findOne({
-  //   where: {
-  //     userId: req.user.id,
-  //   },
-  // })
-  //   .then((cart) => {
-  //     console.log("[Controllers/Shop/addToCart] cart:", cart);
-  //     if (!cart) {
-  //       //cart not found
-  //       return Cart.create({
-  //         //create a new cart
-  //         userId: req.user.id,
-  //       });
-  //     }
-  //     return cart;
-  //   })
-  //   .then((cart) => {
-  //     fetchedCart = cart;
-
-  //     //check if the product is already in the cart
-  //     return CartItem.findOne({
-  //       where: {
-  //         cartId: cart.id,
-  //         productId: productId,
-  //       },
-  //     });
-  //   })
-  //   .then((cartItem) => {
-  //     if (cartItem) {
-  //       cartItem.quantity += 1; //means product is already there in the cart
-  //       return cartItem.save();
-  //     }
-
-  //     //product is not added to the cart yet
-  //     return CartItem.create({
-  //       cartId: fetchedCart.id,
-  //       productId: productId,
-  //       quantity: 1,
-  //     });
-  //   })
-  //   .then((cartItem) => {
-  //     console.log("[Controllers/Shop/addToCart] cartItem:", cartItem);
-  //     res.redirect("/cart");
-  //   })
-  //   .catch((err) => {
-  //     console.log("[Controllers/Shop/addToCart] err:", err);
-  //   });
 };
 
 exports.postCartDeleteProduct = (req, res, next) => {
   console.log("[Controllers/Shop/postCartDeleteProduct] req.body:", req.body);
   const { productId } = req.body;
 
-  Cart.findOne({
-    where: {
-      userId: req.user.id,
-    },
-  })
-    .then((cart) => {
-      CartItem.destroy({
-        where: {
-          cartId: cart.id,
-          productId: productId,
-        },
-      });
-    })
-    .then(() => {
-      console.log("[Controllers/Shop/addToCart] CartItem Deleted");
+  req.user
+    .deleteItemFromCart(productId)
+    .then((result) => {
+      console.log("[Controllers/Shop/postCartDeleteProduct] result:", result);
       res.redirect("/cart");
     })
     .catch((err) => {
