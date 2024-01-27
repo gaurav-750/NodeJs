@@ -1,7 +1,7 @@
 const Product = require("../models/product");
 
 exports.getAllProducts = (req, res, next) => {
-  Product.fetchAllProducts()
+  Product.find()
     .then((products) => {
       res.render("admin/products", {
         prods: products, //passing data to ejs file
@@ -49,7 +49,7 @@ exports.getEditProduct = (req, res, next) => {
   }
 
   const { productId } = req.params;
-  Product.fetchProductDetail(productId)
+  Product.findById(productId)
     .then((product) => {
       if (!product) {
         return res.redirect("/");
@@ -72,16 +72,13 @@ exports.postEditProduct = (req, res, next) => {
   console.log("[Controllers/Admin/postEditProduct] req.body:", req.body);
   const { title, imageUrl, price, description } = req.body;
 
-  const productId = req.body.productId;
-  const product = new Product(
-    title,
-    price,
-    description,
-    imageUrl,
-    new ObjectId(productId)
-  );
-  product
-    .save()
+  const { productId } = req.body;
+  Product.findByIdAndUpdate(productId, {
+    title: title,
+    price: price,
+    description: description,
+    imageUrl: imageUrl,
+  })
     .then((result) => {
       console.log("[Controllers/Admin/postEditProduct] Product Updated.");
       res.redirect("/admin/products");
@@ -95,7 +92,7 @@ exports.postDeleteProduct = (req, res, next) => {
   console.log("[Controllers/Admin/postDeleteProduct] req.body:", req.body);
   const { productId } = req.body;
 
-  Product.deleteProduct(productId)
+  Product.findByIdAndDelete(productId)
     .then((result) => {
       console.log("[Controllers/Admin/postDeleteProduct] Product Deleted.");
       res.redirect("/admin/products");
