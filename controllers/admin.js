@@ -2,7 +2,10 @@ const Product = require("../models/product");
 
 exports.getAllProducts = (req, res, next) => {
   Product.find()
+    // .select("title price -_id")
+    // .populate("userId")
     .then((products) => {
+      console.log("products => ", products);
       res.render("admin/products", {
         prods: products, //passing data to ejs file
         pageTitle: "Admin Products",
@@ -31,6 +34,7 @@ exports.postAddProduct = (req, res, next) => {
     price: price,
     description: description,
     imageUrl: imageUrl,
+    userId: req.user._id,
   })
     .then((result) => {
       console.log("[Controllers/Admin/postAddProduct]: Created Product ");

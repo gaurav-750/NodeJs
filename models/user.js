@@ -16,6 +16,7 @@ const UserSchema = new mongoose.Schema({
       {
         productId: {
           type: mongoose.Schema.Types.ObjectId, //this will be a reference to the product model (id)
+          ref: "Product",
         },
         quantity: {
           type: Number,

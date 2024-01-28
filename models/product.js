@@ -17,6 +17,13 @@ const ProductSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+
+  //Relations
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User", //model which we want to relate to
+    required: true,
+  },
 });
 
 //* creating a Product 'model'
