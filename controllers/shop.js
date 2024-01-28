@@ -1,8 +1,6 @@
 const Product = require("../models/product");
 
 exports.getIndex = (req, res, next) => {
-  //* using mongoose
-
   Product.find()
     .then((products) => {
       res.render("shop/index", {
@@ -17,8 +15,6 @@ exports.getIndex = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  //* using mongoose
-
   Product.find()
     .then((products) => {
       res.render("shop/product-list", {
