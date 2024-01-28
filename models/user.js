@@ -27,5 +27,27 @@ const UserSchema = new mongoose.Schema({
   },
 });
 
+//* Instance methods
+//Now all the user instances will have addToCart method
+UserSchema.methods.addToCart = function (product) {
+  const itemIndex = this.cart.items.findIndex((i) => {
+    return i.productId.equals(product._id);
+  });
+
+  if (itemIndex !== -1) {
+    //product already exists in cart
+    this.cart.items[itemIndex].quantity += 1;
+  } else {
+    //product does not exist in cart
+
+    this.cart.items.push({
+      productId: product._id,
+      quantity: 1,
+    });
+  }
+
+  return this.save();
+};
+
 const User = mongoose.model("User", UserSchema);
 module.exports = User;

@@ -50,14 +50,14 @@ exports.getProductDetail = (req, res, next) => {
 //! CART
 exports.getCart = (req, res, next) => {
   //
-  req.user.getCart().then((products) => {
-    console.log("[Controllers/Shop/getCart] products:", products);
-    res.render("shop/cart", {
-      path: "/cart",
-      pageTitle: "Your Cart",
-      products: products,
-    });
-  });
+  // req.user.getCart().then((products) => {
+  //   console.log("[Controllers/Shop/getCart] products:", products);
+  //   res.render("shop/cart", {
+  //     path: "/cart",
+  //     pageTitle: "Your Cart",
+  //     products: products,
+  //   });
+  // });
 };
 
 //add products to Cart
@@ -65,7 +65,7 @@ exports.addToCart = (req, res, next) => {
   console.log("[Controllers/Shop/addToCart] req.body:", req.body);
   const { productId } = req.body;
 
-  Product.fetchProductDetail(productId)
+  Product.findById(productId)
     .then((product) => {
       return req.user.addToCart(product);
     })

@@ -18,7 +18,7 @@ const ProductSchema = new mongoose.Schema({
     required: true,
   },
 
-  //Relations
+  //* Relations
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User", //model which we want to relate to
