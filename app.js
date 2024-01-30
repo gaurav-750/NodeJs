@@ -42,18 +42,6 @@ app.use(
   })
 );
 
-//* middleware to add user to request
-app.use((req, res, next) => {
-  User.findById("65b5d2a868eecb5c56c90e7e")
-    .then((user) => {
-      req.user = user;
-      next();
-    })
-    .catch((err) => {
-      console.log("err in User middleware:", err);
-    });
-});
-
 app.use("/auth", authRoutes);
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);

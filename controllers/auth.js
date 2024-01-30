@@ -1,3 +1,5 @@
+const User = require("../models/user");
+
 //* Controllers for authentication
 
 exports.getLogin = (req, res, next) => {
@@ -8,7 +10,7 @@ exports.getLogin = (req, res, next) => {
   res.render("auth/login", {
     path: "/login",
     pageTitle: "Login",
-    isAuthenticated: false,
+    isAuthenticated: req.session.isLoggedIn,
   });
 };
 
@@ -18,9 +20,26 @@ exports.postLogin = (req, res, next) => {
 
   //Hence we set a cookie
   // res.setHeader("Set-Cookie", "loggedIn=true");
-  console.log(req.get("Cookie"));
 
-  req.session.isLoggedIn = true;
+  User.findById("65b5d2a868eecb5c56c90e7e")
+    .then((user) => {
+      req.session.user = user;
+      req.session.isLoggedIn = true;
 
-  res.redirect("/");
+      res.redirect("/");
+    })
+    .catch((err) => {
+      console.log("err in User middleware:", err);
+    });
+};
+
+exports.logout = (req, res, next) => {
+  //clear the session
+  req.session.destroy((err) => {
+    if (err) {
+      console.log("err in logout:", err);
+    }
+
+    res.redirect("/");
+  });
 };

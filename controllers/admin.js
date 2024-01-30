@@ -10,7 +10,7 @@ exports.getAllProducts = (req, res, next) => {
         prods: products, //passing data to ejs file
         pageTitle: "Admin Products",
         path: "/admin/products",
-        isAuthenticated: req.isLoggedIn,
+        isAuthenticated: req.session.isLoggedIn,
       });
     })
     .catch((err) => {
@@ -23,7 +23,7 @@ exports.getAddProducts = (req, res, next) => {
   res.render("admin/add-product", {
     pageTitle: "Add Product",
     path: "/admin/add-product",
-    isAuthenticated: req.isLoggedIn,
+    isAuthenticated: req.session.isLoggedIn,
   });
 };
 
@@ -36,7 +36,7 @@ exports.postAddProduct = (req, res, next) => {
     price: price,
     description: description,
     imageUrl: imageUrl,
-    userId: req.user._id,
+    userId: req.session.user._id,
   })
     .then((result) => {
       console.log("[Controllers/Admin/postAddProduct]: Created Product ");
@@ -67,7 +67,7 @@ exports.getEditProduct = (req, res, next) => {
         path: "/admin/edit-product",
         editMode,
         product,
-        isAuthenticated: req.isLoggedIn,
+        isAuthenticated: req.session.isLoggedIn,
       });
     })
     .catch((err) => {
