@@ -1,6 +1,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const session = require("express-session");
+const MongoDBStore = require("connect-mongodb-session")(session);
 
 const path = require("path");
 
@@ -15,6 +16,11 @@ const db = require("./utils/database");
 const User = require("./models/user");
 
 const app = express();
+
+const store = new MongoDBStore({
+  uri: "mongodb+srv://somanigaurav:6owytrHAY2W2K1Zr@nodeshop.d9s3efh.mongodb.net/shop?retryWrites=true&w=majority",
+  collection: "sessions",
+});
 
 //* tell express to use ejs for templating
 app.set("view engine", "ejs");
@@ -31,6 +37,8 @@ app.use(
     name: "sessionid", //default is 'connect.sid
     resave: false,
     saveUninitialized: false,
+
+    store: store,
   })
 );
 
