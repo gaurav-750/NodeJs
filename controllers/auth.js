@@ -1,14 +1,30 @@
 const User = require("../models/user");
 
 const bcryptjs = require("bcryptjs");
+const nodemailer = require("nodemailer");
+
+const transport = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USERNAME,
+    pass: process.env.EMAIL_PASSWORD,
+  },
+});
 
 //* Controllers for authentication
 
 exports.getSignup = (req, res, next) => {
+  let msg = req.flash("error");
+  if (msg.length > 0) {
+    msg = msg[0];
+  } else {
+    msg = null;
+  }
+
   res.render("auth/signup", {
     path: "/signup",
     pageTitle: "Signup",
-    errorMessage: req.flash("error"),
+    errorMessage: msg,
   });
 };
 
@@ -35,6 +51,26 @@ exports.postSignup = (req, res, next) => {
           cart: { items: [] },
         }).then((result) => {
           console.log("result in postSignup:", result);
+
+          //* send email
+          let mailOptions = {
+            from: process.env.EMAIL_USERNAME,
+            to: email,
+            subject: "Signup succeeded!",
+            text: "You successfully signed up on NodeShop!",
+          };
+
+          transport.sendMail(mailOptions, (err, data) => {
+            if (err) {
+              console.log(
+                "[Controllers/Auth/postSignup]: err in sending email:",
+                err
+              );
+            } else {
+              console.log("Email sent: " + data.response);
+            }
+          });
+
           res.redirect("/auth/login");
         });
       });
@@ -84,7 +120,7 @@ exports.postLogin = (req, res, next) => {
           return res.redirect("/auth/login");
         }
 
-        //if password matches, set the session
+        //* if password matches, set the session
         req.session.user = user;
         req.session.isLoggedIn = true;
         return req.session.save((err) => {
