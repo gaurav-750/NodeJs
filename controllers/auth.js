@@ -8,6 +8,7 @@ exports.getSignup = (req, res, next) => {
   res.render("auth/signup", {
     path: "/signup",
     pageTitle: "Signup",
+    errorMessage: req.flash("error"),
   });
 };
 
@@ -19,6 +20,10 @@ exports.postSignup = (req, res, next) => {
   User.findOne({ email: email })
     .then((user) => {
       if (user) {
+        req.flash(
+          "error",
+          "Email already exists. Please pick a different one."
+        );
         return res.redirect("/auth/signup");
       }
 
@@ -40,12 +45,20 @@ exports.postSignup = (req, res, next) => {
 };
 
 exports.getLogin = (req, res, next) => {
-  console.log("🛑", req.session.isLoggedIn);
+  // console.log("🛑", req.session.isLoggedIn);
+
+  let msg = req.flash("error");
+  if (msg.length > 0) {
+    msg = msg[0];
+  } else {
+    msg = null;
+  }
+  console.log("msg:", msg);
 
   res.render("auth/login", {
     path: "/login",
     pageTitle: "Login",
-    errorMessage: req.flash("error"),
+    errorMessage: msg,
   });
 };
 
@@ -57,8 +70,11 @@ exports.postLogin = (req, res, next) => {
   User.findOne({ email: email })
     .then((user) => {
       if (!user) {
-        req.flash("error", "Invalid email or password.");
-        return res.redirect("/auth/login");
+        req.flash("error", ["Invalid email or password."]);
+        return req.session.save((err) => {
+          res.redirect("/auth/login");
+        });
+        // return res.redirect("/auth/login");
       }
 
       //validate the password
