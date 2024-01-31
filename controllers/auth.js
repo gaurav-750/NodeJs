@@ -1,5 +1,7 @@
 const User = require("../models/user");
 
+const bcryptjs = require("bcryptjs");
+
 //* Controllers for authentication
 
 exports.getSignup = (req, res, next) => {
@@ -11,23 +13,26 @@ exports.getSignup = (req, res, next) => {
 };
 
 exports.postSignup = (req, res, next) => {
+  console.log("[Controllers/Auth/postSignup]: req.body", req.body);
   const { email, password, confirmPassword } = req.body;
 
   //check if user already exists
   User.findOne({ email: email })
     .then((user) => {
       if (user) {
-        return res.redirect("/auth/login");
+        return res.redirect("/auth/signup");
       }
 
-      //if user does not exist, create a new user
-      User.create({
-        email: email,
-        password: password,
-        cart: { items: [] },
-      }).then((result) => {
-        console.log("result in postSignup:", result);
-        res.redirect("/auth/login");
+      bcryptjs.hash(password, 12).then((hashedPassword) => {
+        //if user does not exist, create a new user
+        User.create({
+          email: email,
+          password: hashedPassword,
+          cart: { items: [] },
+        }).then((result) => {
+          console.log("result in postSignup:", result);
+          res.redirect("/auth/login");
+        });
       });
     })
     .catch((err) => {
