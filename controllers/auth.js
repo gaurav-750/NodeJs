@@ -51,19 +51,29 @@ exports.getLogin = (req, res, next) => {
 };
 
 exports.postLogin = (req, res, next) => {
-  console.log("Inside postLogin");
-  //   req.isLoggedIn = true; //this wont work because the request is not shared between requests
+  console.log("[Controllers/Auth/postLogin]: req.body", req.body);
+  const { email, password } = req.body;
 
-  //Hence we set a cookie
-  // res.setHeader("Set-Cookie", "loggedIn=true");
-
-  User.findById("65b5d2a868eecb5c56c90e7e")
+  //find the user by email
+  User.findOne({ email: email })
     .then((user) => {
-      req.session.user = user;
-      req.session.isLoggedIn = true;
-      req.session.save((err) => {
-        console.log("err in session save:", err);
-        res.redirect("/");
+      if (!user) {
+        return res.redirect("/auth/signup");
+      }
+
+      //validate the password
+      bcryptjs.compare(password, user.password).then((doMatch) => {
+        if (!doMatch) {
+          return res.redirect("/auth/login");
+        }
+
+        //if password matches, set the session
+        req.session.user = user;
+        req.session.isLoggedIn = true;
+        return req.session.save((err) => {
+          console.log("err in session save:", err);
+          res.redirect("/");
+        });
       });
     })
     .catch((err) => {
