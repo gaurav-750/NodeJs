@@ -2,6 +2,7 @@ const express = require("express");
 
 const router = express.Router();
 const shopController = require("../controllers/shop");
+const isAuthenticated = require("../middleware/is-authenticated");
 
 router.get("/", shopController.getIndex);
 
@@ -9,14 +10,18 @@ router.get("/products", shopController.getProducts);
 
 router.get("/products/:productId", shopController.getProductDetail); //* dynamic route
 
-router.get("/cart", shopController.getCart);
+router.get("/cart", isAuthenticated, shopController.getCart);
 
-router.post("/cart", shopController.addToCart);
+router.post("/cart", isAuthenticated, shopController.addToCart);
 
-router.post("/cart-delete-item", shopController.postCartDeleteProduct);
+router.post(
+  "/cart-delete-item",
+  isAuthenticated,
+  shopController.postCartDeleteProduct
+);
 
 //* orders
-router.post("/create-order", shopController.createOrder);
-router.get("/orders", shopController.getOrders);
+router.post("/create-order", isAuthenticated, shopController.createOrder);
+router.get("/orders", isAuthenticated, shopController.getOrders);
 
 module.exports = router;

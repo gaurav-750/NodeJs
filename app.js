@@ -14,6 +14,7 @@ const errorController = require("./controllers/error");
 //* Connect to MongoDB
 const db = require("./utils/database");
 const User = require("./models/user");
+const isAuthenticated = require("./middleware/is-authenticated");
 
 const app = express();
 
@@ -58,7 +59,7 @@ app.use((req, res, next) => {
 });
 
 app.use("/auth", authRoutes);
-app.use("/admin", adminRoutes);
+app.use("/admin", isAuthenticated, adminRoutes);
 app.use(shopRoutes);
 
 //404 page
