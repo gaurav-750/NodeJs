@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
+const csrf = require("csurf");
 
 const path = require("path");
 
@@ -23,6 +24,8 @@ const store = new MongoDBStore({
   collection: "sessions",
 });
 
+const csrfProtection = csrf();
+
 //* tell express to use ejs for templating
 app.set("view engine", "ejs");
 app.set("views", "views"); //tell express where to find the views
@@ -43,6 +46,8 @@ app.use(
   })
 );
 
+app.use(csrfProtection);
+
 app.use((req, res, next) => {
   if (!req.session.user) {
     return next();
@@ -56,6 +61,15 @@ app.use((req, res, next) => {
     .catch((err) => {
       console.log("err in User middleware:", err);
     });
+});
+
+//* This data (isAuthenticated & csrfToken) will be available in all views
+//we dont need to seperately pass it to each view
+app.use((req, res, next) => {
+  res.locals.isAuthenticated = req.session.isLoggedIn;
+  res.locals.csrfToken = req.csrfToken();
+
+  next();
 });
 
 app.use("/auth", authRoutes);

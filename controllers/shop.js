@@ -9,6 +9,7 @@ exports.getIndex = (req, res, next) => {
         pageTitle: "Shop",
         path: "/",
         isAuthenticated: req.session.isLoggedIn,
+        csrfToken: req.csrfToken(),
       });
     })
     .catch((err) => {
@@ -123,6 +124,7 @@ exports.getOrders = (req, res, next) => {
 
 exports.createOrder = (req, res, next) => {
   //
+  console.log("[Controllers/Shop/createOrder] req.user:", req.user);
   req.user
     .populate("cart.items.productId")
     .then((user) => {
@@ -139,7 +141,7 @@ exports.createOrder = (req, res, next) => {
       return Order.create({
         products: products,
         user: {
-          name: req.user.name,
+          email: req.user.email,
           userId: req.user._id,
         },
       });
