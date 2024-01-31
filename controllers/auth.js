@@ -8,7 +8,6 @@ exports.getSignup = (req, res, next) => {
   res.render("auth/signup", {
     path: "/signup",
     pageTitle: "Signup",
-    isAuthenticated: req.session.isLoggedIn,
   });
 };
 
@@ -46,7 +45,7 @@ exports.getLogin = (req, res, next) => {
   res.render("auth/login", {
     path: "/login",
     pageTitle: "Login",
-    isAuthenticated: req.session.isLoggedIn,
+    errorMessage: req.flash("error"),
   });
 };
 
@@ -58,12 +57,14 @@ exports.postLogin = (req, res, next) => {
   User.findOne({ email: email })
     .then((user) => {
       if (!user) {
-        return res.redirect("/auth/signup");
+        req.flash("error", "Invalid email or password.");
+        return res.redirect("/auth/login");
       }
 
       //validate the password
       bcryptjs.compare(password, user.password).then((doMatch) => {
         if (!doMatch) {
+          req.flash("error", "Invalid email or password.");
           return res.redirect("/auth/login");
         }
 

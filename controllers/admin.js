@@ -10,7 +10,6 @@ exports.getAllProducts = (req, res, next) => {
         prods: products, //passing data to ejs file
         pageTitle: "Admin Products",
         path: "/admin/products",
-        isAuthenticated: req.session.isLoggedIn,
       });
     })
     .catch((err) => {
@@ -23,7 +22,6 @@ exports.getAddProducts = (req, res, next) => {
   res.render("admin/add-product", {
     pageTitle: "Add Product",
     path: "/admin/add-product",
-    isAuthenticated: req.session.isLoggedIn,
   });
 };
 
@@ -67,7 +65,6 @@ exports.getEditProduct = (req, res, next) => {
         path: "/admin/edit-product",
         editMode,
         product,
-        isAuthenticated: req.session.isLoggedIn,
       });
     })
     .catch((err) => {

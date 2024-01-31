@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 const csrf = require("csurf");
+const flash = require("connect-flash");
 
 const path = require("path");
 
@@ -15,6 +16,7 @@ const errorController = require("./controllers/error");
 //* Connect to MongoDB
 const db = require("./utils/database");
 const User = require("./models/user");
+
 const isAuthenticated = require("./middleware/is-authenticated");
 
 const app = express();
@@ -71,6 +73,8 @@ app.use((req, res, next) => {
 
   next();
 });
+
+app.use(flash());
 
 app.use("/auth", authRoutes);
 app.use("/admin", isAuthenticated, adminRoutes);
