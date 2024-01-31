@@ -11,21 +11,6 @@ const db = mongoose.connection;
 
 db.on("error", console.error.bind(console, "Connection error:"));
 db.once("open", function () {
-  //create a user if one does not exist
-  User.findOne().then((user) => {
-    if (!user) {
-      User.create({
-        name: "Gaurav",
-        email: "gaurav@test.com",
-        cart: {
-          items: [],
-        },
-      }).then((user) => {
-        console.log("user:", user);
-      });
-    }
-  });
-
   console.log("Connected to MongoDB!");
 });
 

@@ -10,7 +10,30 @@ exports.getSignup = (req, res, next) => {
   });
 };
 
-exports.postSignup = (req, res, next) => {};
+exports.postSignup = (req, res, next) => {
+  const { email, password, confirmPassword } = req.body;
+
+  //check if user already exists
+  User.findOne({ email: email })
+    .then((user) => {
+      if (user) {
+        return res.redirect("/auth/login");
+      }
+
+      //if user does not exist, create a new user
+      User.create({
+        email: email,
+        password: password,
+        cart: { items: [] },
+      }).then((result) => {
+        console.log("result in postSignup:", result);
+        res.redirect("/auth/login");
+      });
+    })
+    .catch((err) => {
+      console.log("err in postSignup:", err);
+    });
+};
 
 exports.getLogin = (req, res, next) => {
   console.log("🛑", req.session.isLoggedIn);
