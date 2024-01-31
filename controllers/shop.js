@@ -54,9 +54,9 @@ exports.getProductDetail = (req, res, next) => {
 //! CART
 exports.getCart = (req, res, next) => {
   //
-  // console.log(req.user);
-  req.session.user.populate("cart.items.productId").then((user) => {
-    // console.log("[Controllers/Shop/getCart] products:", user.cart.items);
+  console.log(req.user);
+  req.user.populate("cart.items.productId").then((user) => {
+    console.log("[Controllers/Shop/getCart] products:", user.cart.items);
 
     res.render("shop/cart", {
       path: "/cart",
@@ -72,9 +72,10 @@ exports.addToCart = (req, res, next) => {
   console.log("[Controllers/Shop/addToCart] req.body:", req.body);
   const { productId } = req.body;
 
+  console.log("[Controllers/Shop/addToCart] User:", req.user);
   Product.findById(productId)
     .then((product) => {
-      return req.session.user.addToCart(product);
+      return req.user.addToCart(product);
     })
     .then((result) => {
       console.log("[Controllers/Shop/addToCart] result:", result);
@@ -90,7 +91,7 @@ exports.postCartDeleteProduct = (req, res, next) => {
   const { productId } = req.body;
 
   // User
-  req.session.user
+  req.user
     .deleteItemFromCart(productId)
     .then((result) => {
       console.log("[Controllers/Shop/postCartDeleteProduct] result:", result);
@@ -104,7 +105,7 @@ exports.postCartDeleteProduct = (req, res, next) => {
 exports.getOrders = (req, res, next) => {
   //get all the orders of the user
 
-  Order.find({ "user.userId": req.session.user._id })
+  Order.find({ "user.userId": req.user._id })
     .then((orders) => {
       console.log("[Controllers/Shop/getOrders] orders:", orders);
 
@@ -122,7 +123,7 @@ exports.getOrders = (req, res, next) => {
 
 exports.createOrder = (req, res, next) => {
   //
-  req.session.user
+  req.user
     .populate("cart.items.productId")
     .then((user) => {
       const products = user.cart.items.map((i) => {
@@ -138,8 +139,8 @@ exports.createOrder = (req, res, next) => {
       return Order.create({
         products: products,
         user: {
-          name: req.session.user.name,
-          userId: req.session.user._id,
+          name: req.user.name,
+          userId: req.user._id,
         },
       });
     })
@@ -147,8 +148,8 @@ exports.createOrder = (req, res, next) => {
       console.log("[Controllers/Shop/createOrder] result:", result);
 
       //clear the cart
-      req.session.user.cart = { items: [] };
-      req.session.user.save();
+      req.user.cart = { items: [] };
+      req.user.save();
 
       res.redirect("/orders");
     })
