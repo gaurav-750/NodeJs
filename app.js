@@ -5,6 +5,7 @@ const MongoDBStore = require("connect-mongodb-session")(session);
 const csrf = require("csurf");
 const flash = require("connect-flash");
 
+//env setup
 require("dotenv").config();
 
 const path = require("path");
