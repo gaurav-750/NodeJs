@@ -4,6 +4,7 @@ const bcryptjs = require("bcryptjs");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 const { log } = require("console");
+const router = require("../routes/admin");
 
 const transport = nodemailer.createTransport({
   service: "gmail",
@@ -166,6 +167,7 @@ exports.postResetPassword = (req, res, next) => {
   console.log("[Controllers/Auth/postResetPassword]: req.body", req.body);
   const { email } = req.body;
 
+  //? WE ARE USING 'CRYPTO' TO GENERATE A RANDOM TOKEN
   crypto.randomBytes(32, (err, buffer) => {
     if (err) {
       console.log("err in randomBytes:", err);
@@ -199,7 +201,7 @@ exports.postResetPassword = (req, res, next) => {
           subject: "Reset Password",
           text: `
               <p> You requested for a password reset. </p>
-              <p> Click this <a href="http://localhost:3000/auth/reset-password/${token}"> link </a> to set a new password. </p>
+              <p> Click this <a href="http://localhost:3000/auth/new-password/${token}"> link </a> to set a new password. </p>
           `,
         };
 
@@ -216,6 +218,64 @@ exports.postResetPassword = (req, res, next) => {
       })
       .catch((err) => {
         console.log("err in postResetPassword:", err);
+      });
+  });
+};
+
+exports.getNewPassword = (req, res, next) => {
+  console.log("[Controllers/Auth/getNewPassword]: req.params", req.params);
+  const { token } = req.params;
+
+  User.findOne({
+    resetPasswordToken: token,
+    resetPasswordTokenExpiration: { $gt: Date.now() },
+  })
+    .then((user) => {
+      console.log("user in getNewPassword:", user);
+      let msg = req.flash("error");
+      if (msg.length > 0) {
+        msg = msg[0];
+      } else {
+        msg = null;
+      }
+
+      res.render("auth/new-password", {
+        path: "/new-password",
+        pageTitle: "New Password",
+        userId: user._id.toString(),
+        token: token,
+        errorMessage: msg,
+      });
+    })
+    .catch((err) => {
+      console.log("err in getNewPassword:", err);
+    });
+};
+
+exports.postNewPassword = (req, res, next) => {
+  console.log("[Controllers/Auth/postNewPassword]: req.body", req.body);
+  const { userId, token, password } = req.body;
+
+  User.findOne({
+    _id: userId,
+    resetPasswordToken: token,
+    resetPasswordTokenExpiration: { $gt: Date.now() },
+  }).then((user) => {
+    //hash the new password and save it
+
+    bcryptjs
+      .hash(password, 12)
+      .then((hashedPassword) => {
+        user.password = hashedPassword;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordTokenExpiration = undefined;
+
+        return user.save();
+      })
+      .then((result) => {
+        console.log("result in postNewPassword:", result);
+
+        res.redirect("/auth/login");
       });
   });
 };
