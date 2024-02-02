@@ -2,6 +2,8 @@ const User = require("../models/user");
 
 const bcryptjs = require("bcryptjs");
 const nodemailer = require("nodemailer");
+const crypto = require("crypto");
+const { log } = require("console");
 
 const transport = nodemailer.createTransport({
   service: "gmail",
@@ -157,5 +159,63 @@ exports.getResetPassword = (req, res, next) => {
     path: "/reset",
     pageTitle: "Reset Password",
     errorMessage: msg,
+  });
+};
+
+exports.postResetPassword = (req, res, next) => {
+  console.log("[Controllers/Auth/postResetPassword]: req.body", req.body);
+  const { email } = req.body;
+
+  crypto.randomBytes(32, (err, buffer) => {
+    if (err) {
+      console.log("err in randomBytes:", err);
+      return res.redirect("/auth/reset-password");
+    }
+
+    const token = buffer.toString("hex");
+    console.log("🛑token generated:", token);
+
+    //find user
+    User.findOne({ email: email })
+      .then((user) => {
+        if (!user) {
+          req.flash("error", "No account with that email found.");
+          return res.redirect("/auth/reset-password");
+        }
+
+        user.resetPasswordToken = token;
+        user.resetPasswordTokenExpiration = Date.now() + 600000; //10 minutes
+
+        return user.save();
+      })
+      .then((result) => {
+        console.log("result in postResetPassword:", result);
+        res.redirect("/");
+
+        //* send email
+        let mailOptions = {
+          from: process.env.EMAIL_USERNAME,
+          to: email,
+          subject: "Reset Password",
+          text: `
+              <p> You requested for a password reset. </p>
+              <p> Click this <a href="http://localhost:3000/auth/reset-password/${token}"> link </a> to set a new password. </p>
+          `,
+        };
+
+        transport.sendMail(mailOptions, (err, data) => {
+          if (err) {
+            console.log(
+              "[Controllers/Auth/postResetPassword]: err in sending email:",
+              err
+            );
+          } else {
+            console.log("Email sent: " + data.response);
+          }
+        });
+      })
+      .catch((err) => {
+        console.log("err in postResetPassword:", err);
+      });
   });
 };
