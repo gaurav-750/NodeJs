@@ -3,8 +3,7 @@ const User = require("../models/user");
 const bcryptjs = require("bcryptjs");
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
-const { log } = require("console");
-const router = require("../routes/admin");
+const { validationResult } = require("express-validator");
 
 const transport = nodemailer.createTransport({
   service: "gmail",
@@ -34,6 +33,18 @@ exports.getSignup = (req, res, next) => {
 exports.postSignup = (req, res, next) => {
   console.log("[Controllers/Auth/postSignup]: req.body", req.body);
   const { email, password, confirmPassword } = req.body;
+
+  const errors = validationResult(req);
+
+  if (!errors.isEmpty()) {
+    console.log("errors:", errors.array());
+
+    return res.status(422).render("auth/signup", {
+      path: "/signup",
+      pageTitle: "Signup",
+      errorMessage: errors.array()[0].msg,
+    });
+  }
 
   //check if user already exists
   User.findOne({ email: email })

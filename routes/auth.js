@@ -1,5 +1,6 @@
 //To manage authentication routes
 const express = require("express");
+const { check } = require("express-validator");
 
 const router = express.Router();
 
@@ -7,7 +8,11 @@ const authController = require("../controllers/auth");
 
 //* /auth/signup
 router.get("/signup", authController.getSignup);
-router.post("/signup", authController.postSignup);
+router.post(
+  "/signup",
+  check("email").isEmail().withMessage("Please enter a valid email"),
+  authController.postSignup
+);
 
 //* /auth/login
 router.get("/login", authController.getLogin);

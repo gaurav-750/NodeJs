@@ -1,11 +1,12 @@
 const Product = require("../models/product");
 
 exports.getAllProducts = (req, res, next) => {
-  Product.find()
+  Product.find({ userId: req.user._id })
     // .select("title price -_id")
     // .populate("userId")
     .then((products) => {
-      console.log("products => ", products);
+      // console.log("products => ", products);
+
       res.render("admin/products", {
         prods: products, //passing data to ejs file
         pageTitle: "Admin Products",
@@ -96,9 +97,15 @@ exports.postDeleteProduct = (req, res, next) => {
   console.log("[Controllers/Admin/postDeleteProduct] req.body:", req.body);
   const { productId } = req.body;
 
-  Product.findByIdAndDelete(productId)
+  //authorization -> we are also checking if the logged in user is the owner of the product
+  Product.deleteOne({ _id: productId, userId: req.user._id })
     .then((result) => {
-      console.log("[Controllers/Admin/postDeleteProduct] Product Deleted.");
+      if (result.deletedCount !== 0) {
+        console.log(
+          "[Controllers/Admin/postDeleteProduct] Product Deleted.",
+          result
+        );
+      }
       res.redirect("/admin/products");
     })
     .catch((err) => {
