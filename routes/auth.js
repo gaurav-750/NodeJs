@@ -1,16 +1,31 @@
 //To manage authentication routes
 const express = require("express");
-const { check } = require("express-validator");
+const { check, body } = require("express-validator");
 
 const router = express.Router();
 
 const authController = require("../controllers/auth");
 
 //* /auth/signup
+//? Validating email & password using 'express-validator'
 router.get("/signup", authController.getSignup);
 router.post(
   "/signup",
-  check("email").isEmail().withMessage("Please enter a valid email"),
+  [
+    check("email").isEmail().withMessage("Please enter a valid email"),
+    check("password", "Password should be at least 4 characters long").isLength(
+      {
+        min: 4,
+      }
+    ),
+    body("confirmPassword").custom((value, { req }) => {
+      if (value !== req.body.password) {
+        throw new Error("Passwords do not match");
+      }
+      return true;
+    }),
+  ],
+
   authController.postSignup
 );
 

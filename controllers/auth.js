@@ -23,6 +23,8 @@ exports.getSignup = (req, res, next) => {
     msg = null;
   }
 
+  console.log("🛑msg:", msg);
+
   res.render("auth/signup", {
     path: "/signup",
     pageTitle: "Signup",
@@ -35,10 +37,9 @@ exports.postSignup = (req, res, next) => {
   const { email, password, confirmPassword } = req.body;
 
   const errors = validationResult(req);
+  console.log("🛑errors:", errors.array());
 
   if (!errors.isEmpty()) {
-    console.log("errors:", errors.array());
-
     return res.status(422).render("auth/signup", {
       path: "/signup",
       pageTitle: "Signup",
