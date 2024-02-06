@@ -47,47 +47,38 @@ exports.postSignup = (req, res, next) => {
     });
   }
 
-  //check if user already exists
-  User.findOne({ email: email })
-    .then((user) => {
-      if (user) {
-        req.flash(
-          "error",
-          "Email already exists. Please pick a different one."
-        );
-        return res.redirect("/auth/signup");
-      }
+  //* hash the password
+  bcryptjs
+    .hash(password, 12)
+    .then((hashedPassword) => {
+      //if user does not exist, create a new user
+      User.create({
+        email: email,
+        password: hashedPassword,
+        cart: { items: [] },
+      }).then((result) => {
+        console.log("result in postSignup:", result);
 
-      bcryptjs.hash(password, 12).then((hashedPassword) => {
-        //if user does not exist, create a new user
-        User.create({
-          email: email,
-          password: hashedPassword,
-          cart: { items: [] },
-        }).then((result) => {
-          console.log("result in postSignup:", result);
+        //* send email
+        let mailOptions = {
+          from: process.env.EMAIL_USERNAME,
+          to: email,
+          subject: "Signup succeeded!",
+          text: "You successfully signed up on NodeShop!",
+        };
 
-          //* send email
-          let mailOptions = {
-            from: process.env.EMAIL_USERNAME,
-            to: email,
-            subject: "Signup succeeded!",
-            text: "You successfully signed up on NodeShop!",
-          };
-
-          transport.sendMail(mailOptions, (err, data) => {
-            if (err) {
-              console.log(
-                "[Controllers/Auth/postSignup]: err in sending email:",
-                err
-              );
-            } else {
-              console.log("Email sent: " + data.response);
-            }
-          });
-
-          res.redirect("/auth/login");
+        transport.sendMail(mailOptions, (err, data) => {
+          if (err) {
+            console.log(
+              "[Controllers/Auth/postSignup]: err in sending email:",
+              err
+            );
+          } else {
+            console.log("Email sent: " + data.response);
+          }
         });
+
+        res.redirect("/auth/login");
       });
     })
     .catch((err) => {
