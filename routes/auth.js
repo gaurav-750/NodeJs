@@ -42,7 +42,19 @@ router.post(
 
 //* /auth/login
 router.get("/login", authController.getLogin);
-router.post("/login", authController.postLogin);
+router.post(
+  "/login",
+  [
+    check("email").custom(async (value) => {
+      const user = await User.findOne({ email: value });
+      if (!user) {
+        throw new Error("This email does not exist. Please signup first.");
+      }
+      return true;
+    }),
+  ],
+  authController.postLogin
+);
 
 // /auth/logout
 router.post("/logout", authController.logout);

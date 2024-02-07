@@ -29,6 +29,12 @@ exports.getSignup = (req, res, next) => {
     path: "/signup",
     pageTitle: "Signup",
     errorMessage: msg,
+
+    oldInput: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
   });
 };
 
@@ -44,6 +50,13 @@ exports.postSignup = (req, res, next) => {
       path: "/signup",
       pageTitle: "Signup",
       errorMessage: errors.array()[0].msg,
+
+      //kepping the user input -> if there's any error we dont want to clear the input
+      oldInput: {
+        email,
+        password,
+        confirmPassword,
+      },
     });
   }
 
