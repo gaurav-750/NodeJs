@@ -54,6 +54,7 @@ exports.postAddProduct = (req, res, next) => {
   }
 
   Product.create({
+    _id: "ffa",
     title: title,
     price: price,
     description: description,
@@ -66,6 +67,7 @@ exports.postAddProduct = (req, res, next) => {
     })
     .catch((err) => {
       console.log("err in postAddProduct:", err);
+      res.redirect("/500");
     });
 };
 

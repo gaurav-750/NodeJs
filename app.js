@@ -59,12 +59,15 @@ app.use((req, res, next) => {
   }
   User.findById(req.session.user._id)
     .then((user) => {
-      req.user = user;
+      if (user) {
+        req.user = user;
+      }
 
       next();
     })
     .catch((err) => {
       console.log("err in User middleware:", err);
+      throw new Error(err);
     });
 });
 
@@ -83,7 +86,8 @@ app.use("/auth", authRoutes);
 app.use("/admin", isAuthenticated, adminRoutes);
 app.use(shopRoutes);
 
-//404 page
+//error pages
+app.use("/500", errorController.get500);
 app.use("/", errorController.get404);
 
 app.listen(3000, () => {
