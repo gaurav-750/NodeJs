@@ -1,5 +1,7 @@
 const Product = require("../models/product");
 
+const { validationResult } = require("express-validator");
+
 exports.getAllProducts = (req, res, next) => {
   Product.find({ userId: req.user._id })
     // .select("title price -_id")
@@ -23,12 +25,33 @@ exports.getAddProducts = (req, res, next) => {
   res.render("admin/add-product", {
     pageTitle: "Add Product",
     path: "/admin/add-product",
+    product: {},
+    errorMessage: "",
   });
 };
 
 exports.postAddProduct = (req, res, next) => {
   console.log("[Controllers/Admin/postAddProduct]: req.body", req.body);
   const { title, imageUrl, price, description } = req.body;
+
+  const errors = validationResult(req);
+  console.log("[Controllers/Admin/postAddProduct]: errors:", errors);
+
+  if (!errors.isEmpty()) {
+    res.status(422).render("admin/add-product", {
+      pageTitle: "Add Product",
+      path: "/admin/add-product",
+
+      product: {
+        title,
+        imageUrl,
+        price,
+        description,
+      },
+
+      errorMessage: errors.array()[0].msg,
+    });
+  }
 
   Product.create({
     title: title,
@@ -66,6 +89,7 @@ exports.getEditProduct = (req, res, next) => {
         path: "/admin/edit-product",
         editMode,
         product,
+        errorMessage: "",
       });
     })
     .catch((err) => {
@@ -75,9 +99,29 @@ exports.getEditProduct = (req, res, next) => {
 
 exports.postEditProduct = (req, res, next) => {
   console.log("[Controllers/Admin/postEditProduct] req.body:", req.body);
-  const { title, imageUrl, price, description } = req.body;
+  const { title, imageUrl, price, description, productId } = req.body;
 
-  const { productId } = req.body;
+  const errors = validationResult(req);
+  console.log("[Controllers/Admin/postEditProduct]: errors:", errors.array());
+
+  if (!errors.isEmpty()) {
+    res.status(422).render("admin/edit-product", {
+      pageTitle: "Edit Product",
+      path: "/admin/edit-product",
+
+      product: {
+        title,
+        imageUrl,
+        price,
+        description,
+        _id: productId,
+      },
+
+      errorMessage: errors.array()[0].msg,
+    });
+  }
+
+  // const { productId } = req.body;
   Product.findByIdAndUpdate(productId, {
     title: title,
     price: price,
