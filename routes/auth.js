@@ -13,7 +13,10 @@ router.get("/signup", authController.getSignup);
 router.post(
   "/signup",
   [
-    check("email").isEmail().withMessage("Please enter a valid email"),
+    check("email")
+      .isEmail()
+      .withMessage("Please enter a valid email")
+      .normalizeEmail(),
 
     body("email").custom(async (value) => {
       const user = await User.findOne({ email: value });

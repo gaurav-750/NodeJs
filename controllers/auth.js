@@ -36,7 +36,7 @@ exports.getSignup = (req, res, next) => {
       confirmPassword: "",
     },
 
-    errorField: "",
+    errorField: [],
   });
 };
 
@@ -60,7 +60,7 @@ exports.postSignup = (req, res, next) => {
         confirmPassword,
       },
 
-      errorField: errors.array()[0].path,
+      errorField: errors.array(),
     });
   }
 
@@ -118,6 +118,10 @@ exports.getLogin = (req, res, next) => {
     path: "/login",
     pageTitle: "Login",
     errorMessage: msg,
+    oldInput: {
+      email: "",
+      password: "",
+    },
   });
 };
 
@@ -129,18 +133,35 @@ exports.postLogin = (req, res, next) => {
   User.findOne({ email: email })
     .then((user) => {
       if (!user) {
-        req.flash("error", ["Invalid email or password."]);
-        return req.session.save((err) => {
-          res.redirect("/auth/login");
+        return res.status(422).render("auth/login", {
+          path: "/login",
+          pageTitle: "Login",
+          errorMessage: "Invalid email or password.",
+
+          //kepping the user input -> if there's any error we dont want to clear the input
+          oldInput: {
+            email,
+            password,
+          },
+
+          // errorField: [{ path: "email" }, { path: "password" }],
         });
-        // return res.redirect("/auth/login");
       }
 
       //validate the password
       bcryptjs.compare(password, user.password).then((doMatch) => {
         if (!doMatch) {
-          req.flash("error", "Invalid email or password.");
-          return res.redirect("/auth/login");
+          return res.status(422).render("auth/login", {
+            path: "/login",
+            pageTitle: "Login",
+            errorMessage: "Invalid email or password.",
+
+            //kepping the user input -> if there's any error we dont want to clear the input
+            oldInput: {
+              email,
+              password,
+            },
+          });
         }
 
         //* if password matches, set the session
