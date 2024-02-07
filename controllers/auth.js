@@ -35,6 +35,8 @@ exports.getSignup = (req, res, next) => {
       password: "",
       confirmPassword: "",
     },
+
+    errorField: "",
   });
 };
 
@@ -57,6 +59,8 @@ exports.postSignup = (req, res, next) => {
         password,
         confirmPassword,
       },
+
+      errorField: errors.array()[0].path,
     });
   }
 
