@@ -13,7 +13,7 @@ router.post(
   "/add-product",
   [
     check("title").isString().isLength({ min: 3 }).trim(),
-    check("imageUrl").isURL(),
+    // check("imageUrl").isURL(),
     check("price").isFloat(),
     check("description").isLength({ min: 5, max: 300 }).trim(),
   ],

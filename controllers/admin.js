@@ -35,7 +35,9 @@ exports.getAddProducts = (req, res, next) => {
 
 exports.postAddProduct = (req, res, next) => {
   console.log("[Controllers/Admin/postAddProduct]: req.body", req.body);
-  const { title, imageUrl, price, description } = req.body;
+  const { title, price, description } = req.body;
+  const image = req.file;
+  console.log("[Controllers/Admin/postAddProduct]: image:", image);
 
   const errors = validationResult(req);
   console.log("[Controllers/Admin/postAddProduct]: errors:", errors);
@@ -47,7 +49,7 @@ exports.postAddProduct = (req, res, next) => {
 
       product: {
         title,
-        imageUrl,
+        imageUrl: image,
         price,
         description,
       },
@@ -57,11 +59,10 @@ exports.postAddProduct = (req, res, next) => {
   }
 
   Product.create({
-    _id: "ffa",
     title: title,
     price: price,
     description: description,
-    imageUrl: imageUrl,
+    imageUrl: image,
     userId: req.user._id,
   })
     .then((result) => {
