@@ -17,6 +17,9 @@ exports.getAllProducts = (req, res, next) => {
     })
     .catch((err) => {
       console.log("[Controllers/Admin/getAllProducts] err:", err);
+      const error = new Error(err);
+      err.statusCode = 500;
+      return next(error);
     });
 };
 
@@ -67,7 +70,11 @@ exports.postAddProduct = (req, res, next) => {
     })
     .catch((err) => {
       console.log("err in postAddProduct:", err);
-      res.redirect("/500");
+      // res.redirect("/500");
+
+      const error = new Error(err);
+      err.statusCode = 500;
+      return next(error); //this will skip all the middlewares and directly go to the error handling middleware
     });
 };
 
@@ -96,6 +103,10 @@ exports.getEditProduct = (req, res, next) => {
     })
     .catch((err) => {
       console.log("[Controllers/Admin/getEditProduct] err:", err);
+
+      const error = new Error(err);
+      err.statusCode = 500;
+      return next(error);
     });
 };
 
@@ -136,6 +147,10 @@ exports.postEditProduct = (req, res, next) => {
     })
     .catch((err) => {
       console.log("[Controllers/Admin/postEditProduct] err:", err);
+
+      const error = new Error(err);
+      err.statusCode = 500;
+      return next(error);
     });
 };
 
@@ -156,5 +171,9 @@ exports.postDeleteProduct = (req, res, next) => {
     })
     .catch((err) => {
       console.log("[Controllers/Admin/postDeleteProduct] err:", err);
+
+      const error = new Error(err);
+      err.statusCode = 500;
+      return next(error);
     });
 };

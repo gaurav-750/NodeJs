@@ -12,6 +12,10 @@ exports.getIndex = (req, res, next) => {
     })
     .catch((err) => {
       console.log("[Controllers/Shop/getIndex] err:", err);
+
+      const error = new Error(err);
+      error.statusCode = 500;
+      return next(error);
     });
 };
 
@@ -26,6 +30,10 @@ exports.getProducts = (req, res, next) => {
     })
     .catch((err) => {
       console.log("[Controllers/Shop/getProducts] err:", err);
+
+      const error = new Error(err);
+      error.statusCode = 500;
+      return next(error);
     });
 };
 
@@ -45,6 +53,10 @@ exports.getProductDetail = (req, res, next) => {
     })
     .catch((err) => {
       console.log("[Controllers/Shop/getProductDetail] err:", err);
+
+      const error = new Error(err);
+      error.statusCode = 500;
+      return next(error);
     });
 };
 
@@ -79,6 +91,10 @@ exports.addToCart = (req, res, next) => {
     })
     .catch((err) => {
       console.log("[Controllers/Shop/addToCart] err:", err);
+
+      const error = new Error(err);
+      error.statusCode = 500;
+      return next(error);
     });
 };
 
@@ -95,6 +111,10 @@ exports.postCartDeleteProduct = (req, res, next) => {
     })
     .catch((err) => {
       console.log("[Controllers/Shop/postCartDeleteProduct] err:", err);
+
+      const error = new Error(err);
+      error.statusCode = 500;
+      return next(error);
     });
 };
 
@@ -113,6 +133,10 @@ exports.getOrders = (req, res, next) => {
     })
     .catch((err) => {
       console.log("[Controllers/Shop/getOrders] err:", err);
+
+      const error = new Error(err);
+      error.statusCode = 500;
+      return next(error);
     });
 };
 
@@ -151,5 +175,9 @@ exports.createOrder = (req, res, next) => {
     })
     .catch((err) => {
       console.log("[Controllers/Shop/createOrder] err:", err);
+
+      const error = new Error(err);
+      error.statusCode = 500;
+      return next(error);
     });
 };

@@ -100,6 +100,10 @@ exports.postSignup = (req, res, next) => {
     })
     .catch((err) => {
       console.log("err in postSignup:", err);
+
+      const error = new Error(err);
+      error.statusCode = 500;
+      return next(error);
     });
 };
 
@@ -174,7 +178,11 @@ exports.postLogin = (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log("err in User middleware:", err);
+      console.log("err in User postLogin:", err);
+
+      const error = new Error(err);
+      error.statusCode = 500;
+      return next(error);
     });
 };
 
@@ -259,6 +267,10 @@ exports.postResetPassword = (req, res, next) => {
       })
       .catch((err) => {
         console.log("err in postResetPassword:", err);
+
+        const error = new Error(err);
+        error.statusCode = 500;
+        return next(error);
       });
   });
 };
@@ -290,6 +302,10 @@ exports.getNewPassword = (req, res, next) => {
     })
     .catch((err) => {
       console.log("err in getNewPassword:", err);
+
+      const error = new Error(err);
+      error.statusCode = 500;
+      return next(error);
     });
 };
 
@@ -301,22 +317,30 @@ exports.postNewPassword = (req, res, next) => {
     _id: userId,
     resetPasswordToken: token,
     resetPasswordTokenExpiration: { $gt: Date.now() },
-  }).then((user) => {
-    //hash the new password and save it
+  })
+    .then((user) => {
+      //hash the new password and save it
 
-    bcryptjs
-      .hash(password, 12)
-      .then((hashedPassword) => {
-        user.password = hashedPassword;
-        user.resetPasswordToken = undefined;
-        user.resetPasswordTokenExpiration = undefined;
+      bcryptjs
+        .hash(password, 12)
+        .then((hashedPassword) => {
+          user.password = hashedPassword;
+          user.resetPasswordToken = undefined;
+          user.resetPasswordTokenExpiration = undefined;
 
-        return user.save();
-      })
-      .then((result) => {
-        console.log("result in postNewPassword:", result);
+          return user.save();
+        })
+        .then((result) => {
+          console.log("result in postNewPassword:", result);
 
-        res.redirect("/auth/login");
-      });
-  });
+          res.redirect("/auth/login");
+        });
+    })
+    .catch((err) => {
+      console.log("err in postNewPassword:", err);
+
+      const error = new Error(err);
+      error.statusCode = 500;
+      return next(error);
+    });
 };

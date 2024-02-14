@@ -53,6 +53,15 @@ app.use(
 
 app.use(csrfProtection);
 
+//* This data (isAuthenticated & csrfToken) will be available in all views
+//we dont need to seperately pass it to each view
+app.use((req, res, next) => {
+  res.locals.isAuthenticated = req.session.isLoggedIn;
+  res.locals.csrfToken = req.csrfToken();
+
+  next();
+});
+
 app.use((req, res, next) => {
   if (!req.session.user) {
     return next();
@@ -71,15 +80,6 @@ app.use((req, res, next) => {
     });
 });
 
-//* This data (isAuthenticated & csrfToken) will be available in all views
-//we dont need to seperately pass it to each view
-app.use((req, res, next) => {
-  res.locals.isAuthenticated = req.session.isLoggedIn;
-  res.locals.csrfToken = req.csrfToken();
-
-  next();
-});
-
 app.use(flash());
 
 app.use("/auth", authRoutes);
@@ -89,6 +89,13 @@ app.use(shopRoutes);
 //error pages
 app.use("/500", errorController.get500);
 app.use("/", errorController.get404);
+
+app.use((error, req, res, next) => {
+  console.log("error:", error);
+
+  // res.statusCode(error.statusCode).render("500");
+  res.redirect("/500");
+});
 
 app.listen(3000, () => {
   console.log("Server is running on port 3000!");
