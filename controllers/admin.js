@@ -146,7 +146,6 @@ exports.postEditProduct = (req, res, next) => {
 
       product: {
         title,
-        imageUrl,
         price,
         description,
         _id: productId,
@@ -155,8 +154,6 @@ exports.postEditProduct = (req, res, next) => {
       errorMessage: errors.array()[0].msg,
     });
   }
-
-  // const { productId } = req.body;
 
   Product.findById(productId)
     .then((product) => {
