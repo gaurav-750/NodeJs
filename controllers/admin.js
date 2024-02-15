@@ -36,20 +36,37 @@ exports.getAddProducts = (req, res, next) => {
 exports.postAddProduct = (req, res, next) => {
   console.log("[Controllers/Admin/postAddProduct]: req.body", req.body);
   const { title, price, description } = req.body;
-  const image = req.file;
+
+  const image = req.file; //multer will add this to the request object
   console.log("[Controllers/Admin/postAddProduct]: image:", image);
 
+  if (!image) {
+    //that means multer declined the incoming file -> validation error
+    return res.status(422).render("admin/add-product", {
+      pageTitle: "Add Product",
+      path: "/admin/add-product",
+
+      product: {
+        title,
+        price,
+        description,
+      },
+
+      errorMessage: "Attached file is invalid! Please upload an image file.",
+    });
+  }
+
   const errors = validationResult(req);
-  console.log("[Controllers/Admin/postAddProduct]: errors:", errors);
 
   if (!errors.isEmpty()) {
+    console.log("[Controllers/Admin/postAddProduct]: errors:", errors.array());
     res.status(422).render("admin/add-product", {
       pageTitle: "Add Product",
       path: "/admin/add-product",
 
       product: {
         title,
-        imageUrl: image,
+        // imageUrl,
         price,
         description,
       },
@@ -58,11 +75,12 @@ exports.postAddProduct = (req, res, next) => {
     });
   }
 
+  const imageUrl = image.path;
   Product.create({
     title: title,
     price: price,
     description: description,
-    imageUrl: image,
+    imageUrl: imageUrl,
     userId: req.user._id,
   })
     .then((result) => {
@@ -113,7 +131,10 @@ exports.getEditProduct = (req, res, next) => {
 
 exports.postEditProduct = (req, res, next) => {
   console.log("[Controllers/Admin/postEditProduct] req.body:", req.body);
-  const { title, imageUrl, price, description, productId } = req.body;
+  const { title, price, description, productId } = req.body;
+
+  const image = req.file; //multer will add this to the request object
+  // const imageUrl = image ? image.path : null;
 
   const errors = validationResult(req);
   console.log("[Controllers/Admin/postEditProduct]: errors:", errors.array());
@@ -136,12 +157,24 @@ exports.postEditProduct = (req, res, next) => {
   }
 
   // const { productId } = req.body;
-  Product.findByIdAndUpdate(productId, {
-    title: title,
-    price: price,
-    description: description,
-    imageUrl: imageUrl,
-  })
+
+  Product.findById(productId)
+    .then((product) => {
+      if (product.userId.toString() !== req.user._id.toString()) {
+        return res.redirect("/");
+      }
+
+      //if product exist
+      product.title = title;
+      product.price = price;
+      product.description = description;
+
+      if (image) {
+        product.imageUrl = image.path;
+      }
+
+      return product.save();
+    })
     .then((result) => {
       console.log("[Controllers/Admin/postEditProduct] Product Updated.");
       res.redirect("/admin/products");
