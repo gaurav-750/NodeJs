@@ -208,12 +208,30 @@ exports.getInvoice = (req, res, next) => {
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `inline; filename=${invoiceName}`);
 
+    //* streaming the data into the file
     pdfDoc.pipe(fs.createWriteStream(invoicePath));
 
-    //add anything to text
-    pdfDoc.text("This is the invoice");
+    //add data to pdf
+    pdfDoc.font("Helvetica-Bold").fontSize(26).text("Invoice");
 
-    pdfDoc.pipe(res); //return the output to the (client) i.e response
+    pdfDoc.text("--------------------------------------------------");
+
+    let totalPrice = 0;
+    order.products.forEach((prod) => {
+      totalPrice += prod.quantity * prod.product.price;
+      pdfDoc
+        .font("Helvetica")
+        .fontSize(16)
+        .text(
+          `${prod.product.title} - ${prod.quantity} x $${prod.product.price} `
+        );
+    });
+
+    pdfDoc.text();
+    pdfDoc.fontSize(20).text(`Total Price: $${totalPrice}`);
+
+    //streaming the data to the client
+    pdfDoc.pipe(res);
     pdfDoc.end();
 
     //? else reading the file and sending it
