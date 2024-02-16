@@ -9,7 +9,7 @@
                 <ul>
                     <% orders.forEach(order => { %>
                         <li>
-                            <h1> # <%= order._id %> </h1>
+                            <h1> # <%= order._id %> <a href="/orders/<%=order._id%>"> - Invoice</a> </h1> 
                         </li>
 
                         <ul>
@@ -20,7 +20,6 @@
                             <% }) %>
                         </ul>
 
-                        <a href="/orders/<%=order._id%>"> - Invoice</a>
                     <% }) %> 
                 </ul>
 
