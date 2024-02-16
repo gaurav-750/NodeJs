@@ -1,6 +1,7 @@
 const Product = require("../models/product");
 
 const { validationResult } = require("express-validator");
+const { deleteFile } = require("../utils/file");
 
 exports.getAllProducts = (req, res, next) => {
   Product.find({ userId: req.user._id })
@@ -166,6 +167,10 @@ exports.postEditProduct = (req, res, next) => {
       product.description = description;
 
       if (image) {
+        //means user has uploaded a new image
+        //! deleting the old image from the file system
+        deleteFile(product.imageUrl);
+
         product.imageUrl = image.path;
       }
 
@@ -188,8 +193,18 @@ exports.postDeleteProduct = (req, res, next) => {
   console.log("[Controllers/Admin/postDeleteProduct] req.body:", req.body);
   const { productId } = req.body;
 
-  //authorization -> we are also checking if the logged in user is the owner of the product
-  Product.deleteOne({ _id: productId, userId: req.user._id })
+  Product.findById(productId)
+    .then((product) => {
+      if (!product) {
+        return next(new Error("Product not found."));
+      }
+
+      //! deleting the product image from the file system
+      deleteFile(product.imageUrl);
+
+      //authorization -> we are also checking if the logged in user is the owner of the product
+      return Product.deleteOne({ _id: productId, userId: req.user._id });
+    })
     .then((result) => {
       if (result.deletedCount !== 0) {
         console.log(
