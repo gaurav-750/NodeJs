@@ -60,7 +60,7 @@ exports.postAddProduct = (req, res, next) => {
 
   if (!errors.isEmpty()) {
     console.log("[Controllers/Admin/postAddProduct]: errors:", errors.array());
-    res.status(422).render("admin/add-product", {
+    return res.status(422).render("admin/add-product", {
       pageTitle: "Add Product",
       path: "/admin/add-product",
 
@@ -134,13 +134,12 @@ exports.postEditProduct = (req, res, next) => {
   const { title, price, description, productId } = req.body;
 
   const image = req.file; //multer will add this to the request object
-  // const imageUrl = image ? image.path : null;
 
   const errors = validationResult(req);
   console.log("[Controllers/Admin/postEditProduct]: errors:", errors.array());
 
   if (!errors.isEmpty()) {
-    res.status(422).render("admin/edit-product", {
+    return res.status(422).render("admin/edit-product", {
       pageTitle: "Edit Product",
       path: "/admin/edit-product",
 

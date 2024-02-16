@@ -1,6 +1,9 @@
 const Order = require("../models/order");
 const Product = require("../models/product");
 
+const path = require("path");
+const fs = require("fs");
+
 exports.getIndex = (req, res, next) => {
   Product.find()
     .then((products) => {
@@ -180,4 +183,34 @@ exports.createOrder = (req, res, next) => {
       error.statusCode = 500;
       return next(error);
     });
+};
+
+exports.getInvoice = (req, res, next) => {
+  const { orderId } = req.params;
+
+  const invoiceName = `invoice-${orderId}.pdf`;
+  const invoicePath = path.join("data", "invoices", invoiceName);
+
+  //We also need to validate if the user is the owner of the order -> only he can access the invoice
+  Order.findById(orderId).then((order) => {
+    if (!order) {
+      return next(new Error("No Order Found!"));
+    }
+
+    if (order.user.userId.toString() !== req.user._id.toString()) {
+      return next(new Error("You r unauthorized to view this invoice!"));
+    }
+
+    //? else reading the file and sending it
+    fs.readFile(invoicePath, (err, data) => {
+      if (err) {
+        return next(err);
+      }
+
+      //sending the pdf file
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `inline; filename=${invoiceName}`);
+      res.send(data);
+    });
+  });
 };
