@@ -50,6 +50,7 @@
         >
       </li>
       <% } else { %>
+      <li><%= loggedInUser.email.split('@')[0] %></li>
       <li class="main-header__item">
         <form action="/auth/logout" method="post">
           <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
