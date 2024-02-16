@@ -4,6 +4,8 @@ const Product = require("../models/product");
 const path = require("path");
 const fs = require("fs");
 
+const PDFDocument = require("pdfkit");
+
 exports.getIndex = (req, res, next) => {
   Product.find()
     .then((products) => {
@@ -201,16 +203,34 @@ exports.getInvoice = (req, res, next) => {
       return next(new Error("You r unauthorized to view this invoice!"));
     }
 
-    //? else reading the file and sending it
-    fs.readFile(invoicePath, (err, data) => {
-      if (err) {
-        return next(err);
-      }
+    const pdfDoc = new PDFDocument();
 
-      //sending the pdf file
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", `inline; filename=${invoiceName}`);
-      res.send(data);
-    });
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `inline; filename=${invoiceName}`);
+
+    pdfDoc.pipe(fs.createWriteStream(invoicePath));
+
+    //add anything to text
+    pdfDoc.text("This is the invoice");
+
+    pdfDoc.pipe(res); //return the output to the (client) i.e response
+    pdfDoc.end();
+
+    //? else reading the file and sending it
+    // fs.readFile(invoicePath, (err, data) => {
+    //   if (err) {
+    //     return next(err);
+    //   }
+
+    //   //sending the pdf file
+    //   res.setHeader("Content-Type", "application/pdf");
+    //   res.setHeader("Content-Disposition", `inline; filename=${invoiceName}`);
+    //   res.send(data);
+    // });
+
+    //using stream
+    // const file = fs.createReadStream(invoicePath);
+
+    // file.pipe(res); //res is a writable stream
   });
 };
