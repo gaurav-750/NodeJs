@@ -20,6 +20,9 @@ router.post(
   shopController.postCartDeleteProduct
 );
 
+//* checkout
+router.get("/checkout", isAuthenticated, shopController.getCheckout);
+
 //* orders
 router.post("/create-order", isAuthenticated, shopController.createOrder);
 router.get("/orders", isAuthenticated, shopController.getOrders);
