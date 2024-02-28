@@ -5,6 +5,7 @@ const MongoDBStore = require("connect-mongodb-session")(session);
 const csrf = require("csurf");
 const flash = require("connect-flash");
 const multer = require("multer");
+const helmet = require("helmet");
 
 //env setup
 require("dotenv").config();
@@ -72,6 +73,8 @@ app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/images", express.static(path.join(__dirname, "images")));
 
+app.use(helmet());
+
 //* initialize session middleware
 app.use(
   session({
@@ -131,6 +134,6 @@ app.use((error, req, res, next) => {
   res.redirect("/500");
 });
 
-app.listen(3000, () => {
+app.listen(process.env.PORT || 3000, () => {
   console.log("Server is running on port 3000!");
 });

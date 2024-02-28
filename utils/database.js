@@ -1,5 +1,4 @@
-const uri =
-  "mongodb+srv://somanigaurav:6owytrHAY2W2K1Zr@nodeshop.d9s3efh.mongodb.net/shop?retryWrites=true&w=majority";
+const uri = process.env.MONGO_URI;
 
 const mongoose = require("mongoose");
 const User = require("../models/user");
